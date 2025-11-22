@@ -10,12 +10,22 @@
 
     class WinApi {
     public:
-        void fastPrint(const std::string& s) {
+        static void enable_ansi_colors() {
+            HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+            DWORD dwMode = 0;
+            if (GetConsoleMode(hOut, &dwMode)) {
+                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+                SetConsoleMode(hOut, dwMode);
+            }
+        }
+
+        static void fastPrint(const std::string& s) {
             DWORD written;
             HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
             WriteConsoleA(h, s.c_str(), s.size(), &written, nullptr);
         }
-        void clearScreen() {
+
+        static void clearScreen() {
             HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
             CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -34,6 +44,7 @@
 
             // put cursor at top-left
             SetConsoleCursorPosition(h, home);
+            std::cout << "\033[2J";
         }
 
         void Input(char& line) {
@@ -368,12 +379,18 @@
         bool collider=false;
         WinApi win_api;
 
+
         void render_(auto full_x,auto full_y) {
         char basic='_';
 
 
         string line="";
+        int ofset=0;
+            win_api.enable_ansi_colors();
 
+            string map_full="";
+        vector <vector <char>> mp(full_x,vector<char>(full_y));
+            vector <vector <int>> color_arr(full_x,vector<int>(full_y));
 
         long long size=0,min_x=0,min_y=0;
         bool changed=true;
@@ -383,7 +400,7 @@
         bool draw=true;
             map.map_();
         while(1) {
-            win_api.clearScreen();
+
             collider=false;
 
             while (min_y<full_y) {
@@ -392,43 +409,74 @@
                     //if (once==false){
                         draw=true;
                         if (player.x==min_x && player.y==min_y ) {
-                            line+=player.symbol;
+                            mp[player.x][player.y]=player.symbol;
+                            //line+=player.symbol;
                             draw=false;
                         }
+                    if (once!=true) {
                         for (auto t:map.things_stack)
                         {
 
 
                             if (t.x==min_x && t.y==min_y&& collider==false)
                             {
-                                if (t.color==1) line+=color.red();
-                                if (t.color==100) line+=color.brown();
-                                if (t.color==2) line+=color.green();
-                                if (t.color==3) line+=color.yellow();
+                                ofset=5;
+                                if (t.color==1) {//"\033[31m"
+                                    //map_full+=color.red();
 
-                                line+=t.symbol;
+
+                                }
+                                color_arr[t.x][t.y]=t.color;
+                                //if (t.color==100) line+=color.brown();
+                                //if (t.color==2) line+=color.green();
+                                //if (t.color==3) line+=color.yellow();
+
+                                mp[t.x][t.y]=t.symbol;
+                                //line+=t.symbol;
                                 draw=false;
-                                line+=color.color_reset();
+
 
                                 break;
                             }
 
                         }
-
-
                         if (draw==true)
                         {
-                            line+=basic;
+                            mp[min_x][min_y]=basic;
+                            //line+=basic;
+                        }
+                    }
+                    if (draw==true)
+                    {
+                        mp[cache_x][cache_y]=basic;
+                    }
+
+                        if (color_arr[min_x][min_y]==1)
+                        {
+                            map_full+=color.red();
+                        }
+                        if (color_arr[min_x][min_y]==2)
+                        {
+                            map_full+=color.green();
+                        }
+                        if (color_arr[min_x][min_y]==3)
+                        {
+                        map_full+=color.yellow();
+                        }
+                        if (color_arr[min_x][min_y]==100)
+                        {
+                            map_full+=color.brown();
                         }
 
 
-
+                        map_full+=mp[min_x][min_y];
+                        map_full+=color.color_reset();
                         min_x++;
                     }
 
                     min_x=0;//back to zero
-
-                    line+="\n";
+                    map_full+="\n";
+                    //line+="\n";
 
                     min_y++;
                 //}
@@ -441,7 +489,9 @@
                 //}
             }
             once=true;
-            win_api.fastPrint(line);
+            win_api.clearScreen();
+            win_api.fastPrint(map_full);
+
             mover.movement(changed,cache_x,cache_y,player.x,player.y);
 
 
@@ -467,6 +517,7 @@
                 min_y=0;
                 //line.clear();
 
+                map_full.clear();
             }
         }
 
