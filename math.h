@@ -1,6 +1,6 @@
 #pragma once
 #include <cmath>
-
+#include <iostream>
 class function {
     public:
         long long factorial(long long n) {

@@ -1,111 +1,83 @@
 
-    #include "math.h"
-    #include <cmath>
-    #include <iostream>
-    #include <ctime>
-    #include <vector>
-    #include <conio.h>
-    #include <windows.h>
-    using namespace std;
+#include "math.h"
+#include <cmath>
+#include <iostream>
+#include <ctime>
+#include <vector>
+#include <conio.h>
+#include <windows.h>
+using namespace std;
 
-    class WinApi {
-    public:
-        static void enable_ansi_colors() {
-            HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-            DWORD dwMode = 0;
-            if (GetConsoleMode(hOut, &dwMode)) {
-                dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-                SetConsoleMode(hOut, dwMode);
-            }
+class WinApi {
+public:
+    static void enable_ansi_colors()
+    {
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD dwMode = 0;
+        if (GetConsoleMode(hOut, &dwMode)) {
+            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            SetConsoleMode(hOut, dwMode);
         }
+    }
 
-        static void fastPrint(const std::string& s) {
-            DWORD written;
-            HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-            WriteConsoleA(h, s.c_str(), s.size(), &written, nullptr);
-        }
+    static void fastPrint(const std::string& s) {
+        DWORD written;
+        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+        WriteConsoleA(h, s.c_str(), s.size(), &written, nullptr);
+    }
 
-        static void clearScreen() {
-            HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    static void clearScreen() {
+        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
-            CONSOLE_SCREEN_BUFFER_INFO csbi;
-            GetConsoleScreenBufferInfo(h, &csbi);
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(h, &csbi);
 
-            DWORD cellCount = csbi.dwSize.X * csbi.dwSize.Y;
-            DWORD count;
+        DWORD cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+        DWORD count;
 
-            COORD home = {0, 0};
+        COORD home = {0, 0};
 
-            // fill entire buffer with spaces
-            FillConsoleOutputCharacter(h, ' ', cellCount, home, &count);
+        // fill entire buffer with spaces
+        FillConsoleOutputCharacter(h, ' ', cellCount, home, &count);
 
-            // reset all attributes (color, bold, etc)
-            FillConsoleOutputAttribute(h, csbi.wAttributes, cellCount, home, &count);
+        // reset all attributes (color, bold, etc)
+        FillConsoleOutputAttribute(h, csbi.wAttributes, cellCount, home, &count);
 
             // put cursor at top-left
-            SetConsoleCursorPosition(h, home);
-            std::cout << "\033[2J";
-        }
+        SetConsoleCursorPosition(h, home);
+        std::cout << "\033[2J";
+    }
 
-        void Input(char& line) {
-            if (GetAsyncKeyState('Q') & 0x8000)
-                line='q';
-            if (GetAsyncKeyState('W') & 0x8000)
-                line='w';
-            if (GetAsyncKeyState('E') & 0x8000)
-                line='e';
-            if (GetAsyncKeyState('R') & 0x8000)
-                line='r';
-            if (GetAsyncKeyState('T') & 0x8000)
-                line='t';
-            if (GetAsyncKeyState('Y') & 0x8000)
-                line='y';
-            if (GetAsyncKeyState('U') & 0x8000)
-                line='u';
-            if (GetAsyncKeyState('I') & 0x8000)
-                line='i';
-            if (GetAsyncKeyState('O') & 0x8000)
-                line='o';
-            if (GetAsyncKeyState('P') & 0x8000)
-                line='p';
-            if (GetAsyncKeyState('A') & 0x8000)
-                line='a';
-            if (GetAsyncKeyState('S') & 0x8000)
-                line='s';
-            if (GetAsyncKeyState('D') & 0x8000)
-                line='d';
-            if (GetAsyncKeyState('F') & 0x8000)
-                line='f';
-            if (GetAsyncKeyState('G') & 0x8000)
-                line='g';
-            if (GetAsyncKeyState('H') & 0x8000)
-                line='h';
-            if (GetAsyncKeyState('J') & 0x8000)
-                line='j';
-            if (GetAsyncKeyState('K') & 0x8000)
-                line='k';
-            if (GetAsyncKeyState('L') & 0x8000)
-                line='l';
-            if (GetAsyncKeyState('Z') & 0x8000)
-                line='z';
-            if (GetAsyncKeyState('X') & 0x8000)
-                line='x';
-            if (GetAsyncKeyState('C') & 0x8000)
-                line='c';
-            if (GetAsyncKeyState('V') & 0x8000)
-                line='v';
-            if (GetAsyncKeyState('B') & 0x8000)
-                line='b';
-            if (GetAsyncKeyState('N') & 0x8000)
-                line='n';
-            if (GetAsyncKeyState('M') & 0x8000)
-                line='m';
-            if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-                line=' ';
-
+    void Input(char& line) {
+        if (GetAsyncKeyState('Q') & 0x8000) line='q';
+        if (GetAsyncKeyState('W') & 0x8000) line='w';
+        if (GetAsyncKeyState('E') & 0x8000) line='e';
+        if (GetAsyncKeyState('R') & 0x8000) line='r';
+        if (GetAsyncKeyState('T') & 0x8000) line='t';
+        if (GetAsyncKeyState('Y') & 0x8000) line='y';
+        if (GetAsyncKeyState('U') & 0x8000) line='u';
+        if (GetAsyncKeyState('I') & 0x8000) line='i';
+        if (GetAsyncKeyState('O') & 0x8000) line='o';
+        if (GetAsyncKeyState('P') & 0x8000) line='p';
+        if (GetAsyncKeyState('A') & 0x8000) line='a';
+        if (GetAsyncKeyState('S') & 0x8000) line='s';
+        if (GetAsyncKeyState('D') & 0x8000) line='d';
+        if (GetAsyncKeyState('F') & 0x8000) line='f';
+        if (GetAsyncKeyState('G') & 0x8000) line='g';
+        if (GetAsyncKeyState('H') & 0x8000) line='h';
+        if (GetAsyncKeyState('J') & 0x8000) line='j';
+        if (GetAsyncKeyState('K') & 0x8000) line='k';
+        if (GetAsyncKeyState('L') & 0x8000) line='l';
+        if (GetAsyncKeyState('Z') & 0x8000) line='z';
+        if (GetAsyncKeyState('X') & 0x8000) line='x';
+        if (GetAsyncKeyState('C') & 0x8000) line='c';
+        if (GetAsyncKeyState('V') & 0x8000) line='v';
+        if (GetAsyncKeyState('B') & 0x8000) line='b';
+        if (GetAsyncKeyState('N') & 0x8000) line='n';
+        if (GetAsyncKeyState('M') & 0x8000) line='m';
+        if (GetAsyncKeyState(VK_SPACE) & 0x8000) line=' ';
         }
     };
-
 
     //
 
@@ -159,8 +131,8 @@
             things_stack.emplace_back(thing_pos_x,thing_pos_y,car,collider,color);
 
         }
-        void new_heap(auto thing_pos_x,auto thing_pos_y,auto car,auto collider) {
-            things_heap.push_back(new thing(thing_pos_x,thing_pos_y,car,collider));
+        void new_heap(auto thing_pos_x,auto thing_pos_y,auto car,auto collider,auto color) {
+            things_heap.push_back(new thing(thing_pos_x,thing_pos_y,car,collider,color));
         }
         void new_player(long long pos_x,long long pos_y,char symbol_,long long health_,long long maxhealth_) {
             player(pos_x,pos_y,symbol_,health_, maxhealth_);
@@ -240,10 +212,23 @@
             new_stack(x,y+1,symbol,collider,color);
             new_stack(x+1,y+1,symbol,collider,color);
         }
+        void car(auto x,auto y,bool collider,int color) {
+            new_stack(x+1,y,'|',collider,color);
+            new_stack(x+2,y,'#',collider,color);
+            new_stack(x+3,y,'|',collider,color);
+            new_stack(x,y+1,'[',collider,color);
+            new_stack(x+1,y+1,'=',collider,color);
+            new_stack(x+2,y+1,'=',collider,color);
+            new_stack(x+3,y+1,'=',collider,color);
+            new_stack(x+4,y+1,']',collider,color);
+            new_stack(x+1,y+2,'@',collider,color);
+            new_stack(x+3,y+2,'@',collider,color);
+        }
         void map_() {
             tree(2,2,'0',true,2,3);
             house(10,10,'@','O',true,1,3);
             road(6,7,'&',false,2,3);
+            car(20,10,true ,1);
         }
 
     };
@@ -288,6 +273,9 @@
             }
         }
     };
+
+    //
+
     class Camera {
         public:
         long long x_1=0;
@@ -329,6 +317,7 @@
             }
         }
     };
+
     //
 
     class render {
@@ -377,6 +366,7 @@
                             draw=false;
                         }
                     if (once!=true) {
+
                         for (auto t:map.things_stack)
                         {
                             if (t.x==min_x && t.y==min_y&& collider==false)
@@ -392,6 +382,17 @@
                         {
                             mp[min_x][min_y]=basic;
                         }
+                    }
+                    for (auto t:map.things_heap)
+                    {
+                        if (t->x==min_x && t->y==min_y&& collider==false)
+                        {
+                            color_arr[t->x][t->y]=t->color;
+                            mp[t->x][t->y]=t->symbol;
+                            draw=false;
+                            break;
+                        }
+
                     }
                     if (draw==true)
                     {
@@ -448,6 +449,7 @@
     };
 
     //
+
     class gameloop:public render {
         public:
             long long a,b;
