@@ -198,7 +198,7 @@
         char symbol;
         long long health;
         long long maxhealth;
-        player() : x(5), y(5), symbol('#'), health(10), maxhealth(10) {}
+        player() : x(15), y(15), symbol('#'), health(10), maxhealth(10) {}
         player(long long pos_x,long long pos_y,char symbol_,long long health_,long long maxhealth_) {
             x=pos_x;
             y=pos_y;
@@ -334,41 +334,88 @@
 
     class movement_{
     public:
-        void movement(bool &changed,auto& cache_x,auto& cache_y,auto& pos_x,auto& pos_y) {
+        void movement(bool &changed,auto& cache_x,auto& cache_y,auto& pos_x,auto& pos_y,auto&min_x,auto&max_x,auto&min_y,auto&max_y) {
             changed=false;
             cache_x=pos_x;
             cache_y=pos_y;
             string input;
             input=getch();
             if (input=="s") {
-              pos_y++;//they're inverse <- sorry for bad english
-               changed=true;
+
+                    pos_y++;//they're inverse <- sorry for bad english
 
 
+                changed=true;
             }
             if (input=="d") {
-                pos_x++;//they're inverse <- sorry for bad english
-                changed=true;
 
+                    pos_x++;//they're inverse <- sorry for bad english
+
+
+                changed=true;
             }
             if (input=="w") {
-                pos_y--;
-                changed=true;
 
+                    pos_y--;
+
+
+                changed=true;
             }
             if (input=="a") {
-                pos_x--;
-                changed=true;
 
+                    pos_x--;
+
+
+                changed=true;
             }
         }
     };
-
+    class Camera {
+        public:
+        long long x_1=0;
+        long long y_1=0;
+        long long x_2=10;
+        long long y_2=10;
+        long long ofset_x=9;
+        long long ofset_y=8;
+        void update_camera(long long &x,long long &y,long long &full_x,long long &full_y) {
+            if (x-ofset_x>=0) x_1=x-ofset_x;
+            if (y-ofset_y>=0) y_1=y-ofset_y;
+            if (x+ofset_y<=full_x) x_2=x+ofset_x;
+            if (y+ofset_x<=full_y) y_2=y+ofset_y;
+        }
+        void map_camera(auto& color_arr,auto&map_full,auto& mp) {
+            colors color;
+            for (long long yy=y_1;yy<y_2;yy++) {
+                for (long long xx=x_1;xx<x_2;xx++) {
+                    if (color_arr[xx][yy]==1)
+                    {
+                        map_full+=color.red();
+                    }
+                    if (color_arr[xx][yy]==2)
+                    {
+                        map_full+=color.green();
+                    }
+                    if (color_arr[xx][yy]==3)
+                    {
+                        map_full+=color.yellow();
+                    }
+                    if (color_arr[xx][yy]==100)
+                    {
+                        map_full+=color.brown();
+                    }
+                    map_full+=mp[xx][yy];
+                    map_full+=color.color_reset();
+                }
+                map_full+="\n";
+            }
+        }
+    };
     //
 
     class render {
         public:
-
+        Camera camera;
 
         colors color;
         player player;
@@ -385,14 +432,14 @@
 
 
         string line="";
-        int ofset=0;
+
             win_api.enable_ansi_colors();
 
             string map_full="";
         vector <vector <char>> mp(full_x,vector<char>(full_y));
             vector <vector <int>> color_arr(full_x,vector<int>(full_y));
 
-        long long size=0,min_x=0,min_y=0;
+        long long min_x=0,min_y=0;
         bool changed=true;
         bool once=0;
 
@@ -400,42 +447,25 @@
         bool draw=true;
             map.map_();
         while(1) {
+            camera.update_camera(player.x,player.y,full_x,full_y);
 
             collider=false;
-
+            //creating the map
             while (min_y<full_y) {
-
                 while (min_x<full_x) {
-                    //if (once==false){
                         draw=true;
                         if (player.x==min_x && player.y==min_y ) {
                             mp[player.x][player.y]=player.symbol;
-                            //line+=player.symbol;
                             draw=false;
                         }
                     if (once!=true) {
                         for (auto t:map.things_stack)
                         {
-
-
                             if (t.x==min_x && t.y==min_y&& collider==false)
                             {
-                                ofset=5;
-                                if (t.color==1) {//"\033[31m"
-                                    //map_full+=color.red();
-
-
-                                }
                                 color_arr[t.x][t.y]=t.color;
-                                //if (t.color==100) line+=color.brown();
-                                //if (t.color==2) line+=color.green();
-                                //if (t.color==3) line+=color.yellow();
-
                                 mp[t.x][t.y]=t.symbol;
-                                //line+=t.symbol;
                                 draw=false;
-
-
                                 break;
                             }
 
@@ -443,7 +473,6 @@
                         if (draw==true)
                         {
                             mp[min_x][min_y]=basic;
-                            //line+=basic;
                         }
                     }
                     if (draw==true)
@@ -451,48 +480,23 @@
                         mp[cache_x][cache_y]=basic;
                     }
 
-                        if (color_arr[min_x][min_y]==1)
-                        {
-                            map_full+=color.red();
-                        }
-                        if (color_arr[min_x][min_y]==2)
-                        {
-                            map_full+=color.green();
-                        }
-                        if (color_arr[min_x][min_y]==3)
-                        {
-                        map_full+=color.yellow();
-                        }
-                        if (color_arr[min_x][min_y]==100)
-                        {
-                            map_full+=color.brown();
-                        }
 
-
-                        map_full+=mp[min_x][min_y];
-                        map_full+=color.color_reset();
                         min_x++;
                     }
-
                     min_x=0;//back to zero
-                    map_full+="\n";
                     //line+="\n";
-
                     min_y++;
-                //}
-                //if (once==true){
-                //    draw=true;
-                //    if (player.x==min_x && player.y==min_y ) {
-                //        line[]=player.symbol;
-                //        draw=false;
-                //    }
-                //}
+
             }
+            map_full="";
+
+            camera.map_camera(color_arr,map_full,mp);
+
             once=true;
             win_api.clearScreen();
-            win_api.fastPrint(map_full);
 
-            mover.movement(changed,cache_x,cache_y,player.x,player.y);
+            win_api.fastPrint(map_full);
+            mover.movement(changed,cache_x,cache_y,player.x,player.y,min_x,full_x,min_y,full_y);
 
 
 
