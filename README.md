@@ -1,1 +1,2 @@
-Just a game engine in terminal
+Just a game engine in terminal.
+Sorry for bad english.
