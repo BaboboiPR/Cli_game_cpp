@@ -9,4 +9,5 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_executable(full main.cpp functions.cpp functions.h
-        game.cpp)
+        game.cpp
+        math.h)
