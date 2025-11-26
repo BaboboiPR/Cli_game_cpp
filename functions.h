@@ -207,7 +207,7 @@
 
         }
 
-        void road(auto x,auto y,char symbol,bool collider,int color,int color1) {
+        void bush(auto x,auto y,char symbol,bool collider,int color,int color1) {
             new_stack(x,y,symbol,collider,color);
             new_stack(x+1,y,symbol,collider,color);
 
@@ -217,7 +217,7 @@
         void map_() {
             tree(2,2,'0',true,2,3);
             house(10,10,'@','O',true,1,3);
-            road(6,7,'&',false,2,3);
+            bush(6,7,'&',false,2,3);
         }
 
     };

@@ -1,8 +1,12 @@
-
-#include "math.h"
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX 1
+#endif
+#define _NO_STD_BYTE 1
+#include <cstddef>
+#include  "functionsSave.h"
 #include <cmath>
 #include <iostream>
-#include <ctime>
 #include <vector>
 #include <conio.h>
 #include <windows.h>
@@ -88,7 +92,8 @@ public:
         char symbol;
         long long health;
         long long maxhealth;
-        player() : x(15), y(15), symbol('#'), health(10), maxhealth(10) {}
+        long long damage;
+        player() : x(15), y(15), symbol('#'), health(100), maxhealth(100), damage(5) {}
         player(long long pos_x,long long pos_y,char symbol_,long long health_,long long maxhealth_) {
             x=pos_x;
             y=pos_y;
@@ -108,12 +113,16 @@ public:
         char symbol;
         bool collider;
         int color;
-        thing(long long thing_pos_x=10,long long thing_pos_y=10,char stone='@',bool collider1 =false,int color_=0) {
+        int damage;
+        int health;
+        thing(long long thing_pos_x=10,long long thing_pos_y=10,char stone='@',bool collider1 =false,int color_=0,int damage_=0,int _health=-1) {
             x=thing_pos_x;
             y=thing_pos_y;
             symbol=stone;
             collider=collider1;
             color =color_;
+            damage=damage_;
+            health=_health;
         }
 
     };
@@ -131,9 +140,17 @@ public:
             things_stack.emplace_back(thing_pos_x,thing_pos_y,car,collider,color);
 
         }
-        void new_heap(auto thing_pos_x,auto thing_pos_y,auto car,auto collider,auto color) {
-            things_heap.push_back(new thing(thing_pos_x,thing_pos_y,car,collider,color));
+        void new_stack(auto thing_pos_x,auto thing_pos_y,auto car,auto collider,auto color,auto damage){
+            things_stack.emplace_back(thing_pos_x,thing_pos_y,car,collider,color,damage);
+
         }
+        void new_stack(auto thing_pos_x,auto thing_pos_y,auto car,auto collider,auto color,auto damage,auto health) {
+            things_stack.push_back(thing(thing_pos_x,thing_pos_y,car,collider,color,damage,health));
+        }
+        void new_heap(auto thing_pos_x,auto thing_pos_y,auto car,auto collider,auto color,auto damage) {
+            things_heap.push_back(new thing(thing_pos_x,thing_pos_y,car,collider,color,damage));
+        }
+
         void new_player(long long pos_x,long long pos_y,char symbol_,long long health_,long long maxhealth_) {
             player(pos_x,pos_y,symbol_,health_, maxhealth_);
         }
@@ -204,13 +221,18 @@ public:
             new_stack(x+3,y+4,symbol,collider,color1);
 
         }
+        void food(auto x,auto y,char symbol,bool collider,int color,long long health) {
+            new_stack(x,y,symbol,collider,color,-health);
+        }
+        void enemy(auto x,auto y,char symbol,bool collider,int color,long long damage,auto health) {
+            new_stack(x,y,symbol,collider,color,damage,health);
+        }
+        void bush(auto x,auto y,char symbol,bool collider,int color,int color1) {
+            new_stack(x,y,symbol,collider,color,1);
+            new_stack(x+1,y,symbol,collider,color,1);
 
-        void road(auto x,auto y,char symbol,bool collider,int color,int color1) {
-            new_stack(x,y,symbol,collider,color);
-            new_stack(x+1,y,symbol,collider,color);
-
-            new_stack(x,y+1,symbol,collider,color);
-            new_stack(x+1,y+1,symbol,collider,color);
+            new_stack(x,y+1,symbol,collider,color,1);
+            new_stack(x+1,y+1,symbol,collider,color,1);
         }
         void car(auto x,auto y,bool collider,int color) {
             new_stack(x+1,y,'|',collider,color);
@@ -227,8 +249,10 @@ public:
         void map_() {
             tree(2,2,'0',true,2,3);
             house(10,10,'@','O',true,1,3);
-            road(6,7,'&',false,2,3);
+            bush(6,7,'&',false,2,3);
             car(20,10,true ,1);
+            food(10,10,'0',false,1,3);
+            enemy(9 ,10,'&',true,2,3,10);
         }
 
     };
@@ -237,39 +261,30 @@ public:
 
     class movement_{
     public:
-        void movement(bool &changed,auto& cache_x,auto& cache_y,auto& pos_x,auto& pos_y,auto&min_x,auto&max_x,auto&min_y,auto&max_y) {
+        void movement(bool &changed,auto& cache_x,auto& cache_y,auto& pos_x,auto& pos_y,auto&min_x,auto&max_x,auto&min_y,auto&max_y,auto& game) {
             changed=false;
             cache_x=pos_x;
             cache_y=pos_y;
-            string input;
+            int input;
             input=getch();
-            if (input=="s") {
-
+            if (input=='s') {
                     pos_y++;//they're inverse <- sorry for bad english
-
-
                 changed=true;
             }
-            if (input=="d") {
-
+            if (input=='d') {
                     pos_x++;//they're inverse <- sorry for bad english
-
-
                 changed=true;
             }
-            if (input=="w") {
-
+            if (input=='w') {
                     pos_y--;
-
-
                 changed=true;
             }
-            if (input=="a") {
-
+            if (input=='a') {
                     pos_x--;
-
-
                 changed=true;
+            }
+            if (input == 27) {
+                game=0;
             }
         }
     };
@@ -284,6 +299,8 @@ public:
         long long y_2=10;
         long long ofset_x=9;
         long long ofset_y=8;
+        colors color;
+        player player;
         void update_camera(long long &x,long long &y,long long &full_x,long long &full_y) {
             if (x-ofset_x>=0) x_1=x-ofset_x;
             if (y-ofset_y>=0) y_1=y-ofset_y;
@@ -291,7 +308,7 @@ public:
             if (y+ofset_x<=full_y) y_2=y+ofset_y;
         }
         void map_camera(auto& color_arr,auto&map_full,auto& mp) {
-            colors color;
+
             for (long long yy=y_1;yy<y_2;yy++) {
                 for (long long xx=x_1;xx<x_2;xx++) {
                     if (color_arr[xx][yy]==1)
@@ -310,8 +327,12 @@ public:
                     {
                         map_full+=color.brown();
                     }
-                    map_full+=mp[xx][yy];
-                    map_full+=color.color_reset();
+
+                        map_full+=mp[xx][yy];
+                        map_full+=color.color_reset();
+
+
+
                 }
                 map_full+="\n";
             }
@@ -320,9 +341,12 @@ public:
 
     //
 
+    //
+
     class render {
         public:
         Camera camera;
+        bool game=true;
 
         colors color;
         player player;
@@ -333,119 +357,164 @@ public:
         bool collider=false;
         WinApi win_api;
 
-
         void render_(auto full_x,auto full_y) {
-        char basic='_';
+            Saving::read_player_pos("player_data.txt",player.x,player.y,player.health);
+            char basic='_';
 
 
-        string line="";
+            string line="";
 
-            win_api.enable_ansi_colors();
 
             string map_full="";
-        vector <vector <char>> mp(full_x,vector<char>(full_y));
+            vector <vector <char>> mp(full_x,vector<char>(full_y));
             vector <vector <int>> color_arr(full_x,vector<int>(full_y));
+            long long cleaner=0;
 
-        long long min_x=0,min_y=0;
-        bool changed=true;
-        bool once=0;
 
-        long long cache_x=0,cache_y=0;
-        bool draw=true;
+            long long min_x=0,min_y=0;
+            bool changed=true;
+            bool once=0;
+
+
+            long long cache_x=0,cache_y=0;
+            bool draw=true;
             map.map_();
-        while(1) {
-            camera.update_camera(player.x,player.y,full_x,full_y);
+            while(game) {
 
-            collider=false;
-            //creating the map
-            while (min_y<full_y) {
-                while (min_x<full_x) {
+                camera.update_camera(player.x,player.y,full_x,full_y);
+
+                collider=false;
+                //creating the map
+                while (min_y<full_y) {
+                    while (min_x<full_x) {
                         draw=true;
                         if (player.x==min_x && player.y==min_y ) {
                             mp[player.x][player.y]=player.symbol;
                             draw=false;
                         }
-                    if (once!=true) {
-
-                        for (auto t:map.things_stack)
+                        for (int t=map.things_stack.size()-1;t>=0;t--)
                         {
-                            if (t.x==min_x && t.y==min_y&& collider==false)
+
+                            if (map.things_stack[t].x==min_x and map.things_stack[t].y==min_y and map.things_stack[t].collider==false)
                             {
-                                color_arr[t.x][t.y]=t.color;
-                                mp[t.x][t.y]=t.symbol;
+                                if (map.things_stack[t].x==player.x and map.things_stack[t].y==player.y) {
+                                    player.health=player.health-map.things_stack[t].damage;
+                                    if (map.things_stack[t].damage<0) {
+                                        cleaner++;
+
+
+                                        color_arr[map.things_stack[t].x][map.things_stack[t].y]=0;
+                                        map.things_stack.erase(map.things_stack.begin() + t);
+
+                                        continue;
+                                    }
+                                }
+                                color_arr[map.things_stack[t].x][map.things_stack[t].y]=map.things_stack[t].color;
+                                mp[map.things_stack[t].x][map.things_stack[t].y]=map.things_stack[t].symbol;
                                 draw=false;
                                 break;
                             }
 
-                        }
-                        if (draw==true)
-                        {
-                            mp[min_x][min_y]=basic;
-                        }
-                    }
-                    for (auto t:map.things_heap)
-                    {
-                        if (t->x==min_x && t->y==min_y&& collider==false)
-                        {
-                            color_arr[t->x][t->y]=t->color;
-                            mp[t->x][t->y]=t->symbol;
-                            draw=false;
-                            break;
+
                         }
 
-                    }
-                    if (draw==true)
-                    {
-                        mp[cache_x][cache_y]=basic;
-                    }
+                        if (once!=true) {
+
+                            for (int t=map.things_stack.size()-1;t>=0;t--)
+                            {
+
+                            if (map.things_stack[t].x==min_x and map.things_stack[t].y==min_y and map.things_stack[t].collider==true)
+                            {
+                                if (map.things_stack[t].x==player.x and map.things_stack[t].y==player.y) {
+                                    player.health=player.health-map.things_stack[t].damage;
+                                    if (map.things_stack[t].damage<0) {
+                                        cleaner++;
+
+                                        color_arr.erase(color_arr.begin() + t);
+                                        map.things_stack.erase(map.things_stack.begin() + t);
+
+                                        continue;
+                                    }
+                                }
+                                color_arr[map.things_stack[t].x][map.things_stack[t].y]=map.things_stack[t].color;
+                                mp[map.things_stack[t].x][map.things_stack[t].y]=map.things_stack[t].symbol;
+                                draw=false;
+                                break;
+                            }
+
+
+                            }
+                                if (draw==true)
+                                {
+                                    mp[min_x][min_y]=basic;
+                                }
+                            }
+
+
+
+                        if (draw==true)
+                        {
+                            mp[cache_x][cache_y]=basic;
+                        }
 
 
                         min_x++;
                     }
-                    min_x=0;//back to zero
-                    //line+="\n";
+                    min_x=0;
+
                     min_y++;
 
-            }
-            map_full="";
+                }
 
-            camera.map_camera(color_arr,map_full,mp);
+                map_full="";
 
-            once=true;
-            win_api.clearScreen();
+                camera.map_camera(color_arr,map_full,mp);
 
-            win_api.fastPrint(map_full);
-            mover.movement(changed,cache_x,cache_y,player.x,player.y,min_x,full_x,min_y,full_y);
-
-
+                once=true;
+                win_api.clearScreen();
+                cout<<""<<"Player health: "<<player.health<<""<<endl;
+                cout<<map_full;
 
 
-            for (auto object: map.things_stack) {
-            if (object.collider && object.x==player.x && object.y==player.y) {
-                collider=true;
-                break;
+                mover.movement(changed,cache_x,cache_y,player.x,player.y,min_x,full_x,min_y,full_y,game);
+                Saving::save_player_pos("player_data.txt",player.x,player.y,player.health);
 
-            }
-            }
-            if (collider) {
-                ;
-                player.x=cache_x;
-                player.y=cache_y;
-                changed=false;
-            }
 
-            changed=true;
-            if (changed) {
-                min_x=0;
-                min_y=0;
-                //line.clear();
+                for (int i=map.things_stack.size()-1;i>=0;i--) {
 
-                map_full.clear();
+                    if (map.things_stack[i].collider && map.things_stack[i].x==player.x && map.things_stack[i].y==player.y) {
+                        collider=true;
+                        if (map.things_stack[i].health>0)
+                        {
+                            map.things_stack[i].health-=player.damage;
+                            player.health-=map.things_stack[i].damage;
+                        }
+                        if (map.things_stack[i].health==0)
+                        {
+                            color_arr[map.things_stack[i].x][map.things_stack[i].y]=0;
+                            map.things_stack.erase(map.things_stack.begin()+i);
+
+                        }
+
+                        break;
+                    }
+                }
+                if (collider) {
+                    player.x=cache_x;
+                    player.y=cache_y;
+                    changed=false;
+                }
+
+                changed=true;
+                if (changed) {
+                    min_x=0;
+                    min_y=0;
+
+
+                    map_full.clear();
+                }
             }
         }
-
-
-    }
     };
 
     //
@@ -457,6 +526,7 @@ public:
             void game_loop() {
                 cin>>a>>b;
                 render_(a,b);
+
             }
     };
 

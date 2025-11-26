@@ -8,6 +8,6 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-add_executable(full main.cpp functions.cpp functions.h
+add_executable(full main.cpp functionsSave.h functions.h
         game.cpp
         math.h)
