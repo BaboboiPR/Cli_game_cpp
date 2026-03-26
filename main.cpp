@@ -1,12 +1,13 @@
 #include <iostream>
 #include "game.cpp"
 
-int main() {
-    using namespace std;
 
+int main() {
+
+    srand(time(0));
     gameloop game;
     game.game_loop();
 
 
-    return 0;
+
 }

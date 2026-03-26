@@ -1,6 +1,6 @@
     #pragma once
 
-    using namespace std;
+
     #include <cmath>
     #include <iostream>
     #include <ctime>
@@ -259,7 +259,7 @@
         public:
 
         colors color;
-        player player;
+        player player1;
 
         Game_map map;
         movement_ mover;
@@ -287,8 +287,8 @@
                 while (min_x<full_x) {
 
                     draw=true;
-                    if (player.x==min_x && player.y==min_y ) {
-                        line+=player.symbol;
+                    if (player1.x==min_x && player1.y==min_y ) {
+                        line+=player1.symbol;
                         draw=false;
                     }
                     for (auto t:map.things_stack)
@@ -325,13 +325,13 @@
                 min_y++;
             }
             cout<<line<<flush;
-            mover.movement(changed,cache_x,cache_y,player.x,player.y);
+            mover.movement(changed,cache_x,cache_y,player1.x,player1.y);
 
 
 
 
             for (auto object: map.things_stack) {
-            if (object.collider && object.x==player.x && object.y==player.y) {
+            if (object.collider && object.x==player1.x && object.y==player1.y) {
                 collider=true;
                 break;
 
@@ -339,8 +339,8 @@
             }
             if (collider) {
                 ;
-                player.x=cache_x;
-                player.y=cache_y;
+                player1.x=cache_x;
+                player1.y=cache_y;
                 changed=false;
             }
 
