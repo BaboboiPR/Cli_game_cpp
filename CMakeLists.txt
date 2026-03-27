@@ -11,8 +11,6 @@ endif()
 add_executable(full main.cpp functionsSave.h functions.h
         game.cpp
         math.h
-        WIN_API.h
-        colors.h
-        "polluter std.h"
-        other.cpp
-        other.h)
+        IO.h
+        IO.cpp
+        movement.h)

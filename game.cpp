@@ -2,75 +2,69 @@
 
 #define NO_STD_BYTE 1
 #include  "functionsSave.h"
-#include <cmath>
-#include <iostream>
-#include <vector>
-#include <conio.h>
-#include <windows.h>
+
 #include "colors.h"
+#include "movement.h"
 #include "WIN_API.h"
 #include "polluter std.h"
 #include "other.h"
     //
 
 
-    struct player
-    {
-        position2D position;
-        char symbol;
-        long long health;
-        long long maxhealth;
-        long long damage;
-    };
+          struct player
+          {
+                    position2D position;
+                    int health;
+                    int maxhealth;
+                    int damage;
+                    char symbol;
+          };
 
 
-    class thing {
-        public:
+          class thing
+          {
+                    public:
 
-        position2D position;
-        char symbol;
-        bool collider;
-        int color;
-        int damage;
-        int health;
-        thing(long long thing_pos_x = 10, long long thing_pos_y = 10,char stone = '@', bool collider1 = false, int color_ = 0,int damage_ = 0, int _health = -1)
-        {
-            position.x = thing_pos_x;
-            position.y = thing_pos_y;
-            symbol = stone;
-            collider = collider1;
-            color = color_;
-            damage = damage_;
-            health = _health;
-        }
-        thing(const position2D position,char stone='@',bool collider1 =false,int color_=0,int damage_=0,int _health=-1) {
-            this->position.x=position.x;
-            this->position.y=position.y;
-            symbol=stone;
-            collider=collider1;
-            color =color_;
-            damage=damage_;
-            health=_health;
-        }
+                    position2D position;
+                    short color;
+                    short damage;
+                    short health;
+                    char symbol;
+                    bool collider;
+                    thing(long long thing_pos_x = 10, long long thing_pos_y = 10, const char stone = '@', bool collider1 = false, const int color_ = 0,int damage_ = 0, int _health = -1)
+                    {
+                              position.x = thing_pos_x;
+                              position.y = thing_pos_y;
+                              symbol = stone;
+                              collider = collider1;
+                              color = color_;
+                              damage = damage_;
+                              health = _health;
+                    }
+                    thing(const position2D position,char stone='@',bool collider1 =false,int color_=0, const int damage_=0,int _health=-1) {
+                              this->position = position;
+                              symbol=stone;
+                              collider=collider1;
+                              color =color_;
+                              damage=damage_;
+                              health=_health;
+                    }
 
 
-    };
+          };
 
     //
 
     class functions_things {
         public:
-
-        auto rand_(auto& i,auto max,auto min) {
+              static auto rand_(auto& i,auto max,auto min) {
 
             i=min+rand()%(max-min+1);
             return i;
         }
 
-        auto rand_(auto max,auto min) {
-            long long i;
-
-            i=min+rand()%(max-min+1);
+        static auto rand_(auto max,auto min) {
+                  long long i = min + rand() % (max - min + 1);
             return i;
         }
 
@@ -81,16 +75,16 @@
             things_stack.emplace_back(position.x,position.y,car,collider,color);
 
         }
-        void new_stack(position2D position,auto car,auto collider,auto color,auto damage) {
-            things_stack.push_back(thing(position.x,position.y,car,collider,color,damage));
+        void new_stack(position2D position,char character,bool collider,short color,short damage) {
+            things_stack.push_back(thing(position,character,collider,color,damage));
 
         }
-        void new_stack(position2D position,auto car,auto collider,auto color,auto damage,auto health) {
-            things_stack.push_back(thing(position.x,position.y,car,collider,color,damage,health));
+        void new_stack(position2D position,char character,bool collider,short color,short damage,short health) {
+            things_stack.push_back(thing(position,character,collider,color,damage,health));
         }
-        void new_heap(position2D position,auto car,auto collider,auto color,auto damage) {
-            things_heap.push_back(new thing(position.x,position.y,car,collider,color,damage));
-        }
+        // void new_heap(position2D position,char car,bool collider,short color,short damage) {
+        //     things_heap.push_back( new thing(position,car,collider,color,damage));
+        // }
         void new_stack(long long x, long long y, auto car, auto collider, auto color) {
             position2D pos{ x, y };
             new_stack(pos, car, collider, color);
@@ -111,24 +105,24 @@
     class Game_map:public functions_things{
     public:
         colors color;
-        void tree(auto x,auto y,char symbol,bool collider,int color,int color1) {
-            position2D position;
+        void tree(long long x,long long y,char symbol, const bool collider, const short color, const short color1) {
+            position2D position{};
             position.x=x;
             position.y=y;
-            new_stack(  position2D{x,y},symbol,collider,color);//2=x,1=y
-            new_stack(  position2D{x,y+1},symbol,collider,color);
-            new_stack(  position2D{x,y+1},symbol,collider,color);
+            new_stack({x,y},symbol,collider,color);//2=x,1=y
+            new_stack({x,y+1},symbol,collider,color);
+            new_stack({x,y+1},symbol,collider,color);
             new_stack({x-1,y+1},symbol,collider,color);
             new_stack({x-2,y+2},symbol,collider,color);//
             new_stack({x-1,y+2},symbol,collider,color);
             new_stack({x+2,y+2},symbol,collider,color);
-            new_stack(  position2D{x,y+2},symbol,collider,color);//base
-            new_stack(  position2D{x,y+2},symbol,collider,color);
+            new_stack({x,y+2},symbol,collider,color);//base
+            new_stack({x,y+2},symbol,collider,color);
             new_stack({x+1,y+2},symbol,collider,color);//
-            new_stack(  position2D{x,y+3},symbol,collider,color1);//start
+            new_stack({x,y+3},symbol,collider,color1);//start
         }
 
-        void house(auto x,auto y,char symbol,char symbol2,bool collider,int color,int color1) {
+        void house(long long x,long long y,char symbol,char symbol2,bool collider,short color,short color1) {
             //00#00
 
             //0###0
@@ -197,99 +191,62 @@
 
     //
 
-    class movement_{
-    public:
-        void movement(bool &changed,auto& cache_x,auto& cache_y,auto& pos_x,auto& pos_y,auto&min_x,auto&max_x,auto&min_y,auto&max_y,auto& game) {
-            changed=false;
-            cache_x=pos_x;
-            cache_y=pos_y;
-            int input;
-            #ifdef _WIN32
-            input=getch();
-            #endif
-            #ifdef __linux__
-            cin>>input;
-            #endif
-
-            if (input=='s') {
-                    pos_y++;//they're inverse <- sorry for bad english
-                changed=true;
-            }
-            if (input=='d') {
-                    pos_x++;//they're inverse <- sorry for bad english
-                changed=true;
-            }
-            if (input=='w') {
-                    pos_y--;
-                changed=true;
-            }
-            if (input=='a') {
-                    pos_x--;
-                changed=true;
-            }
-            if (input == 27) {
-                game=0;
-            }
-            changed=true;
-        }
-    };
 
 
 
-    struct Camera {
-        long long x_1=0;
-        long long y_1=0;
-        long long x_2=10;
-        long long y_2=10;
-        long long ofset_x=9;
-        long long ofset_y=8;
-    };
+
+struct Camera
+{
+          position2D pos_1 ={0,0};
+          position2D pos_2 = {10,10};
+          position2D offset= {9,8};
+
+};
     //
 
-    class Rendering{
+          class Rendering{
 
 
-        public:
-        Camera cam{0,0,10,10,9,8};
+                    public:
+                    Camera cam{0,0,10,10,9,8};
 
 
 
 
 
-        void creating_map(auto& min_y,auto& full_y,auto& min_x,auto& full_x,auto& draw,auto& map,auto& color_arr,auto& mp,auto& once,auto& basic,auto&cache_x,auto&cache_y,auto& player){
-            while (min_y<full_y) {
-                    while (min_x<full_x) {
-                        draw=true;
-                        for (int t=map.things_stack.size()-1;t>=0;t--)
-                        {
+                    void creating_map(position2D full,position2D min,auto& draw,auto& map,auto& color_arr,auto& mp,auto& once,auto& basic,position2D cache,auto& player){
+                              while (min.y<full.y) {
+                                        while (min.x<full.x) {
+                                                  draw=true;
+                                                            for (int t=map.things_stack.size()-1;t>=0;t--)
+                                                            {
 
-                            if (map.things_stack[t].position.x==min_x and map.things_stack[t].position.y==min_y and map.things_stack[t].collider==false)
-                            {
-                                if (map.things_stack[t].position.x==player.position.x and map.things_stack[t].position.y==player.position.y) {
-                                    player.health=player.health-map.things_stack[t].damage;
-                                    if (map.things_stack[t].damage<0){
-                                        color_arr[map.things_stack[t].position.x][map.things_stack[t].position.y]=0;
-                                        map.things_stack.erase(map.things_stack.begin() + t);
+                                                                      if (map.things_stack[t].position.x==min.x and map.things_stack[t].position.y==min.y and map.things_stack[t].collider==false)
+                                                                      {
+                                                                                if (map.things_stack[t].position.x==player.position.x and map.things_stack[t].position.y==player.position.y) {
+                                                                                player.health=player.health-map.things_stack[t].damage;
+                                                                                if (map.things_stack[t].damage<0){
+                                                                                          color_arr[map.things_stack[t].position.x][map.things_stack[t].position.y]=0;
+                                                                                          map.things_stack.erase(map.things_stack.begin() + t);
+                                                                                }
+                                                                                          continue;
+                                                                                }
+                                                                                color_arr[map.things_stack[t].position.x][map.things_stack[t].position.y]=map.things_stack[t].color;
+                                                                                mp[map.things_stack[t].position.x][map.things_stack[t].position.y]=map.things_stack[t].symbol;
+                                                                                draw=false;
+                                                                                break;
+                                                                      }
 
-                                    }
-                                    continue;
-                                }
-                                color_arr[map.things_stack[t].position.x][map.things_stack[t].position.y]=map.things_stack[t].color;
-                                mp[map.things_stack[t].position.x][map.things_stack[t].position.y]=map.things_stack[t].symbol;
-                                draw=false;
-                                break;
-                            }
 
-
-                        }
+                                                            }
 
                         if (once!=true)
                             {
 
-                            for (int t=map.things_stack.size()-1;t>=0;t--)
+                            for (int t=map.things_stack.size()-1;t>=0;--t)
                                 {
 
-                                if (map.things_stack[t].position.x==min_x and map.things_stack[t].position.y==min_y and map.things_stack[t].collider==true)
+                                if (map.things_stack[t].position.x==min.x and map.things_stack[t].position.y==min.y and map.things_stack[t].collider==true)
                                     {
                                     if (map.things_stack[t].position.x==player.position.x and map.things_stack[t].position.y==player.position.y)
                                         {
@@ -312,33 +269,33 @@
                                 }
                                 if (draw==true)
                                 {
-                                    mp[min_x][min_y]=basic;
+                                    mp[min.x][min.y]=basic;
                                 }
                             }
 
-                        if (player.position.x==min_x && player.position.y==min_y ) {
+                        if (player.position.x==min.x && player.position.y==min.y ) {
                             mp[player.position.x][player.position.y]=player.symbol;
                             draw=false;
                         }
 
                         if (draw==true)
                         {
-                            mp[cache_x][cache_y]=basic;
+                            mp[cache.x][cache.y]=basic;
                         }
 
 
-                        min_x++;
+                        min.x++;
                     }
-                    min_x=0;
+                    min.x=0;
 
-                    min_y++;
+                    min.y++;
 
                 }
         }
         void map_camera(auto& color_arr,auto&map_full,auto& mp) {
 
-            for (long long yy=cam.y_1;yy<cam.y_2;yy++) {
-                for (long long xx=cam.x_1;xx<cam.x_2;xx++) {
+            for (long long yy=cam.pos_1.y;yy<cam.pos_2.y;yy++) {
+                for (long long xx=cam.pos_1.x;xx<cam.pos_2.x;xx++) {
                     if (color_arr[xx][yy]==1)
                     {
                         map_full+=colors::red();
@@ -367,11 +324,11 @@
 
     class View_Camera : public Rendering{
     public:
-        void update_camera(Camera& cam,long long &x,long long &y,long long &full_x,long long &full_y) {
-            if (x-cam.ofset_x>=0) cam.x_1=x-cam.ofset_x;
-            if (y-cam.ofset_y>=0) cam.y_1=y-cam.ofset_y;
-            if (x+cam.ofset_y<=full_x) cam.x_2=x+cam.ofset_x;
-            if (y+cam.ofset_x<=full_y) cam.y_2=y+cam.ofset_y;
+              static void update_camera(Camera& cam,position2D& pos,position2D full) {
+            if (pos.x-cam.offset.x>=0) cam.pos_1.x=pos.x-cam.offset.x;
+            if (pos.y-cam.offset.y>=0) cam.pos_1.y=pos.y-cam.offset.y;
+            if (pos.x+cam.offset.y<=full.x) cam.pos_2.x=pos.x+cam.offset.x;
+            if (pos.y+cam.offset.x<=full.y) cam.pos_2.y=pos.y+cam.offset.y;
         }
     };
 
@@ -386,45 +343,45 @@
         bool game=true;
 
         Game_map map;
-        movement_ mover;
+        Movement mover;
 
         bool collider=false;
         WinApi win_api;
 
-        player player{1,1,'#',100,100,3};
+        player player{ {1,1},100,100,3,'#'};
 
-        void render_(auto full_x,auto full_y) {
+        void render_(position2D full) {
 
-            Saving::read_player_pos("player_data.txt",player.position,player.health);
+            //Saving::read_player_pos("player_data.txt",player.position,player.health);
             char basic='_';
 
             string line="";
             View_Camera view_camera;
 
             string map_full="";
-            vector <vector <char>> mp(full_x,vector<char>(full_y));
+            vector <vector <char>> mp(full.x,vector<char>(full.y));
 
-            vector <vector <int>> color_arr(full_x,vector<int>(full_y));
+            vector <vector <short>> color_arr(full.x,vector<short>(full.y));
             long long cleaner=0;
 
-            long long min_x=0,min_y=0;
+            position2D min = {};
             bool changed=true;
 
             bool once=0;
 
 
-            long long cache_x=0,cache_y=0;
+            position2D cache = {};
             bool draw=true;
 
             map.map_();
 
             while(game) {
 
-                view_camera.update_camera(camera.cam,player.position.x,player.position.y,full_x,full_y);
+                view_camera.update_camera(camera.cam,player.position,full);
 
                 collider=false;
 
-                camera.creating_map(min_y,full_y,min_x,full_x,draw,map,color_arr,mp,once,basic,cache_x,cache_y,player);
+                camera.creating_map(full,min,draw,map,color_arr,mp,once,basic,cache,player);
                 map_full="";
 
                 camera.map_camera(color_arr,map_full,mp);
@@ -436,12 +393,12 @@
                 #else
                     System("CLS");
                 #endif
+
                 cout<<""<<"Player health: "<<player.health<<""<<endl;
                 cout<<map_full;
 
 
-                mover.movement(changed,cache_x,cache_y,player.position.x,player.position.y,min_x,full_x,min_y,full_y,game);
-                Saving::save_player_pos("player_data.txt",player.position,player.health);
+                mover.movement(changed,cache,player.position,game);
 
 
                 for (int i=map.things_stack.size()-1;i>=0;i--) {
@@ -464,15 +421,15 @@
                     }
                 }
                 if (collider) {
-                    player.position.x=cache_x;
-                    player.position.y=cache_y;
+                    player.position.x=cache.x;
+                    player.position.y=cache.y;
                     changed=false;
                 }
 
                 changed=true;
                 if (changed) {
-                    min_x=0;
-                    min_y=0;
+                    min.x=0;
+                    min.y=0;
 
 
                     map_full.clear();
@@ -483,15 +440,17 @@
 
     //
 
-    class gameloop:public render {
-        public:
-            long long a,b;
+class gameloop: public render
+          {
+                    public:
+                    position2D a = {100,100};
+                    bool once = true;
+                    void game_loop() {
 
-            void game_loop() {
-                cin>>a>>b;
-                render_(a,b);
+                                        render::render_(a);
+                                        //Saving::save_player_pos(player.position,player.health);
 
-            }
-    };
+                    }
+          };
 
     //

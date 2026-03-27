@@ -2,10 +2,18 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <cmath>
+#include <conio.h>
+#include <windows.h>
+#include <thread>
+#include "IO.h"
+#include "other.h"
 using std::cout;
 using std::endl;
 using std::vector;
 using std::string;
+
 using std::to_string;
 using std::cin;
 using std::ofstream;

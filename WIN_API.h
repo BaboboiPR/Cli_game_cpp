@@ -15,11 +15,6 @@ public:
         }
     }
 
-    static void fastPrint(const std::string& s) {
-        DWORD written;
-        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-        WriteConsoleA(h, s.c_str(), s.size(), &written, nullptr);
-    }
 
     static void clearScreen() {
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
